@@ -43,8 +43,8 @@ u32 exynos_smc1(u32 cmd, u32 arg1, u32 arg2, u32 arg3)
 
         __asm__ volatile (
         ".arch_extension sec\n"
-                "smc        0\n"
-                : "+r"(reg0), "+r"(reg1), "+r"(reg2), "+r"(reg3)
+        "smc        0\n"
+        : "+r"(reg0), "+r"(reg1), "+r"(reg2), "+r"(reg3)
         );
 
 	return reg0;
@@ -64,13 +64,11 @@ int exynos_smc_read_oemflag(u32 ctrl_word, u32 *val)
 		reg2 = idx;
 
                 __asm__ volatile (
-                        ".arch_extension sec\n"
-                        "smc    0\n"
-                        :"+r" (reg0), "+r"(reg1),
-				  "+r"(reg2), "+r"(reg3)
-		    );
-		if (reg1)
-			return -1;
+                ".arch_extension sec\n"
+                "smc    0\n" : "+r" (reg0), "+r"(reg2), "+r"(reg3)
+                );
+                if (reg1)
+                        return -1;
 	}
 
 	reg0 = -202;
@@ -78,17 +76,15 @@ int exynos_smc_read_oemflag(u32 ctrl_word, u32 *val)
 	reg2 = idx;
 
         __asm__ volatile (
-                        ".arch_extension sec\n"
-                        "smc    0\n"
-                        :"+r" (reg0), "+r"(reg1), "+r"(reg2),
-			  "+r"(reg3)
-	    );
-	if (reg1)
-		return -1;
+        ".arch_extension sec\n"
+        "smc    0\n" : "+r" (reg0), "+r"(reg1), "+r"(reg2), "+r"(reg3)
+        );
+        if (reg1)
+                return -1;
 
-	*val = reg2;
+        *val = reg2;
 
-	return 0;
+        return 0;
 }
 
 static DEFINE_MUTEX(tzic_mutex);
