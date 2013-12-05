@@ -20,11 +20,6 @@
 #include <asm/uaccess.h>
 #include "kstrtox.h"
 
-static inline char _tolower(const char c)
-{
-	return c | 0x20;
-}
-
 const char *_parse_integer_fixup_radix(const char *s, unsigned int *base)
 {
 	if (*base == 0) {
