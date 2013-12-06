@@ -746,11 +746,11 @@ static int exynos_cpufreq_cpu_init(struct cpufreq_policy *policy)
 
 	retval = cpufreq_frequency_table_cpuinfo(policy, exynos_info->freq_table);
 
-	/* Keep stock frq. as default startup frq. */
+	/* Safe default startup limits */
 	policy->max = 1400000;
 	policy->min = 200000;
 
-	return retval;
+        return retval;
 }
 
 static int exynos_cpufreq_reboot_notifier_call(struct notifier_block *this,
@@ -770,6 +770,11 @@ static struct notifier_block exynos_cpufreq_reboot_notifier = {
 	.notifier_call = exynos_cpufreq_reboot_notifier_call,
 };
 
+static struct freq_attr *exynos_cpufreq_attr[] = {
+        &cpufreq_freq_attr_scaling_available_freqs,
+        NULL,
+};
+
 static struct cpufreq_driver exynos_driver = {
 	.flags		= CPUFREQ_STICKY,
 	.verify		= exynos_verify_speed,
@@ -777,6 +782,7 @@ static struct cpufreq_driver exynos_driver = {
 	.get		= exynos_getspeed,
 	.init		= exynos_cpufreq_cpu_init,
 	.name		= "exynos_cpufreq",
+        .attr		= exynos_cpufreq_attr,
 #ifdef CONFIG_PM
 	.suspend	= exynos_cpufreq_suspend,
 	.resume		= exynos_cpufreq_resume,
@@ -889,74 +895,74 @@ ssize_t show_LP_mV_table(struct cpufreq_policy *policy, char *buf) {
 }
 
 ssize_t store_LP_uV_table(struct cpufreq_policy *policy, 
-                                 const char *buf, size_t count) {
+				 const char *buf, size_t count) {
 
-        int i, tokens, top_offset, invalid_offset;
-        int t[CPUFREQ_LEVEL_END];
+	int i, tokens, top_offset, invalid_offset;
+	int t[CPUFREQ_LEVEL_END];
 
-        top_offset = 0;
-        invalid_offset = 0;
+	top_offset = 0;
+	invalid_offset = 0;
 
-        if((tokens = read_into((int*)&t, CPUFREQ_LEVEL_END, buf, count)) < 0)
-                return -EINVAL;
+	if((tokens = read_into((int*)&t, CPUFREQ_LEVEL_END, buf, count)) < 0)
+		return -EINVAL;
 
-        if(tokens != CPUFREQ_LEVEL_END) {
-                top_offset = CPUFREQ_LEVEL_END - tokens;
-        }
+	if(tokens != CPUFREQ_LEVEL_END) {
+		top_offset = CPUFREQ_LEVEL_END - tokens;
+	}
 
-        for (i = 0 + top_offset; i < CPUFREQ_LEVEL_END; i++) {
-                if (t[i] > CPU_UV_MV_MAX) 
-                        t[i] = CPU_UV_MV_MAX;
-                else if (t[i] < CPU_UV_MV_MIN) 
-                        t[i] = CPU_UV_MV_MIN;
+	for (i = 0 + top_offset; i < CPUFREQ_LEVEL_END; i++) {
+		if (t[i] > CPU_UV_MV_MAX) 
+			t[i] = CPU_UV_MV_MAX;
+		else if (t[i] < CPU_UV_MV_MIN) 
+			t[i] = CPU_UV_MV_MIN;
 
-                while(exynos_info->freq_table[i+invalid_offset].frequency==CPUFREQ_ENTRY_INVALID)
-                        ++invalid_offset;
+		while(exynos_info->freq_table[i+invalid_offset].frequency==CPUFREQ_ENTRY_INVALID)
+			++invalid_offset;
 
-                exynos_info->volt_table[i+invalid_offset] = t[i];
-        }
+		exynos_info->volt_table[i+invalid_offset] = t[i];
+	}
 
-        return count;
-}  		
+	return count;
+}		
 
 ssize_t store_LP_mV_table(struct cpufreq_policy *policy, 
-                                 const char *buf, size_t count) {
+				 const char *buf, size_t count) {
 
-        int i, tokens, top_offset, invalid_offset;
-        int t[CPUFREQ_LEVEL_END];
+	int i, tokens, top_offset, invalid_offset;
+	int t[CPUFREQ_LEVEL_END];
 
-        top_offset = 0;
-        invalid_offset = 0;
+	top_offset = 0;
+	invalid_offset = 0;
 
-        if((tokens = read_into((int*)&t, CPUFREQ_LEVEL_END, buf, count)) < 0)
-                return -EINVAL;
+	if((tokens = read_into((int*)&t, CPUFREQ_LEVEL_END, buf, count)) < 0)
+		return -EINVAL;
 
-        if(tokens != CPUFREQ_LEVEL_END) {
-                top_offset = CPUFREQ_LEVEL_END - tokens;
-        }
+	if(tokens != CPUFREQ_LEVEL_END) {
+		top_offset = CPUFREQ_LEVEL_END - tokens;
+	}
 
-        for (i = 0 + top_offset; i < CPUFREQ_LEVEL_END; i++) {
-                int rest = 0;
+	for (i = 0 + top_offset; i < CPUFREQ_LEVEL_END; i++) {
+		int rest = 0;
 
-                        t[i] *= 1000;
+			t[i] *= 1000;
 
-                if((rest = t[i] % 12500) != 0){
-                        if(rest > 6250)
-                                t[i] += rest;
-                        else
-                                t[i] -= rest;
-                }
+		if((rest = t[i] % 12500) != 0){
+			if(rest > 6250)
+				t[i] += rest;
+			else
+				t[i] -= rest;
+		}
 
-                if (t[i] > CPU_UV_MV_MAX) 
-                        t[i] = CPU_UV_MV_MAX;
-                else if (t[i] < CPU_UV_MV_MIN) 
-                        t[i] = CPU_UV_MV_MIN;
+		if (t[i] > CPU_UV_MV_MAX) 
+			t[i] = CPU_UV_MV_MAX;
+		else if (t[i] < CPU_UV_MV_MIN) 
+			t[i] = CPU_UV_MV_MIN;
 
-                while(exynos_info->freq_table[i+invalid_offset].frequency==CPUFREQ_ENTRY_INVALID)
-                        ++invalid_offset;
+		while(exynos_info->freq_table[i+invalid_offset].frequency==CPUFREQ_ENTRY_INVALID)
+			++invalid_offset;
 
-                exynos_info->volt_table[i+invalid_offset] = t[i];
-        }
+		exynos_info->volt_table[i+invalid_offset] = t[i];
+	}
 
-        return count;
+	return count;
 }
