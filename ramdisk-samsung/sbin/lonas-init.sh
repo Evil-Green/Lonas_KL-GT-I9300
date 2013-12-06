@@ -32,6 +32,13 @@ if [ ! -f /system/bin/busybox ]; then
 /sbin/busybox ln -s /sbin/busybox /system/bin/pkill
 fi
 
+# Instalador de LPowerCC.apk
+if [ ! -f /system/app/LPowerCC.apk ]; then
+  cat /res/LPowerCC.apk > /system/app/LPowerCC.apk
+/sbin/busybox chown 0.0 /system/app/LPowerCC.apk
+/sbin/busybox chmod 644 /system/app/LPowerCC.apk
+fi
+
 # Daemons para el ROOT
 /res/ext/DaemonSU.sh
 
@@ -57,7 +64,13 @@ fi
 /res/ext/tweaks.sh
 /res/ext/tweaks_build.sh
 
+# soporte LPowerCC
+/sbin/busybox rm /data/.lpowercc/lpowercc.xml
+/sbin/busybox rm /data/.lpowercc/action.cache
+
 sync
+
+/res/init_uci.sh apply
 
 if [ -d /system/etc/init.d ]; then
   /sbin/busybox run-parts /system/etc/init.d
