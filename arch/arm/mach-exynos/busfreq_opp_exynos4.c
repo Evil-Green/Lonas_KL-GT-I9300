@@ -666,7 +666,7 @@ static DEVICE_ATTR(dmc_max_threshold, S_IRUGO | S_IWUGO, show_dmc_max_threshold,
 static DEVICE_ATTR(load_history_size, S_IRUGO | S_IWUGO, show_load_history_size, store_load_history_size);
 static DEVICE_ATTR(sampling_rate, S_IRUGO | S_IWUGO, show_sampling_rate, store_sampling_rate);
 static DEVICE_ATTR(LP_mif_volt_table, S_IRUGO | S_IWUGO, show_LP_mif_volt_table, store_LP_mif_volt_table);
-static DEVICE_ATTR(int_volt_table, S_IRUGO | S_IWUGO, show_LP_int_volt_table, store_LP_LP_int_volt_table);
+static DEVICE_ATTR(LP_int_volt_table, S_IRUGO | S_IWUGO, show_LP_int_volt_table, store_LP_int_volt_table);
 
 static struct attribute *busfreq_attributes[] = {
 	&dev_attr_min_freq.attr,
