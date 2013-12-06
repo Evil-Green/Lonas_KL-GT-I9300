@@ -974,8 +974,7 @@ on property:persist.sys.drs.enforce=1
 on property:persist.sys.drs.enforce=0
 	start auditd
 	
-service lonas-init /system/bin/sh /sbin/lonas-init.sh
-    class main
+service lonas-init /sbin/lonas-init.sh
+    class core
     user root
-    group root
     oneshot
