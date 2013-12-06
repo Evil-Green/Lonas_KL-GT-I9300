@@ -23,8 +23,8 @@
 static ssize_t charge_level_ac_show(struct kobject *kobj, struct kobj_attribute *attr, char *buf)
 {
 
-	// print current value
-	return sprintf(buf, "%d mA", ac_level);
+        // print current value
+        return sprintf(buf, "%d mA", ac_level);
 
 }
 
@@ -32,35 +32,35 @@ static ssize_t charge_level_ac_show(struct kobject *kobj, struct kobj_attribute 
 static ssize_t charge_level_ac_store(struct kobject *kobj, struct kobj_attribute *attr, const char *buf, size_t count)
 {
 
-	unsigned int ret = -EINVAL;
-	int val;
+        unsigned int ret = -EINVAL;
+        int val;
 
-	// read value from input buffer
-	ret = sscanf(buf, "%d", &val);
+        // read value from input buffer
+        ret = sscanf(buf, "%d", &val);
 
-	// check whether value is within the valid ranges and adjust accordingly
-	if (val > AC_CHARGE_LEVEL_MAX)
-	{
-		val = AC_CHARGE_LEVEL_MAX;
-	}
+        // check whether value is within the valid ranges and adjust accordingly
+        if (val > AC_CHARGE_LEVEL_MAX)
+        {
+                val = AC_CHARGE_LEVEL_MAX;
+        }
 
-	if (val < AC_CHARGE_LEVEL_MIN)
-	{
-		val = AC_CHARGE_LEVEL_MIN;
-	}
+        if (val < AC_CHARGE_LEVEL_MIN)
+        {
+                val = AC_CHARGE_LEVEL_MIN;
+        }
 
-	// store value
-	ac_level = val;
+        // store value
+        ac_level = val;
 
-	return count;
+        return count;
 }
 
 
 static ssize_t charge_level_usb_show(struct kobject *kobj, struct kobj_attribute *attr, char *buf)
 {
 
-	// print current value
-	return sprintf(buf, "%d mA", usb_level);
+        // print current value
+        return sprintf(buf, "%d mA", usb_level);
 
 }
 
@@ -68,27 +68,27 @@ static ssize_t charge_level_usb_show(struct kobject *kobj, struct kobj_attribute
 static ssize_t charge_level_usb_store(struct kobject *kobj, struct kobj_attribute *attr, const char *buf, size_t count)
 {
 
-	unsigned int ret = -EINVAL;
-	int val;
+        unsigned int ret = -EINVAL;
+        int val;
 
-	// read value from input buffer
-	ret = sscanf(buf, "%d", &val);
+        // read value from input buffer
+        ret = sscanf(buf, "%d", &val);
 
-	// check whether value is within the valid ranges and adjust accordingly
-	if (val > USB_CHARGE_LEVEL_MAX)
-	{
-		val = USB_CHARGE_LEVEL_MAX;
-	}
+        // check whether value is within the valid ranges and adjust accordingly
+        if (val > USB_CHARGE_LEVEL_MAX)
+        {
+                val = USB_CHARGE_LEVEL_MAX;
+        }
 
-	if (val < USB_CHARGE_LEVEL_MIN)
-	{
-		val = USB_CHARGE_LEVEL_MIN;
-	}
+        if (val < USB_CHARGE_LEVEL_MIN)
+        {
+                val = USB_CHARGE_LEVEL_MIN;
+        }
 
-	// store value
-	usb_level = val;
+        // store value
+        usb_level = val;
 
-	return count;
+        return count;
 }
 
 
@@ -116,27 +116,27 @@ static struct kobject *charge_level_kobj;
 
 int charge_level_init(void)
 {
-	int charge_level_retval;
+        int charge_level_retval;
 
         charge_level_kobj = kobject_create_and_add("charge_levels", kernel_kobj);
 
         if (!charge_level_kobj)
-	{
-		printk("Lonas_KL: failed to create kernel object for charge level interface.\n");
+        {
+                printk("Lonas_KL: failed to create kernel object for charge level interface.\n");
                 return -ENOMEM;
         }
 
         charge_level_retval = sysfs_create_group(charge_level_kobj, &charge_level_attr_group);
 
         if (charge_level_retval)
-	{
-			kobject_put(charge_level_kobj);
-		printk("Lonas_KL: failed to create fs object for charge level interface.\n");
-	        return (charge_level_retval);
-	}
+        {
+                        kobject_put(charge_level_kobj);
+                printk("Lonas_KL: failed to create fs object for charge level interface.\n");
+                return (charge_level_retval);
+        }
 
-	// print debug info
-	printk("Lonas_KL: charge level interface started.\n");
+        // print debug info
+        printk("Lonas_KL: charge level interface started.\n");
 
         return (charge_level_retval);
 }
@@ -144,10 +144,10 @@ int charge_level_init(void)
 
 void charge_level_exit(void)
 {
-	kobject_put(charge_level_kobj);
+        kobject_put(charge_level_kobj);
 
-	// print debug info
-	printk("Lonas_KL: charge level interface stopped.\n");
+        // print debug info
+        printk("Lonas_KL: charge level interface stopped.\n");
 }
 
 

@@ -136,8 +136,8 @@ static unsigned int _target(struct busfreq_data *data, struct opp *new)
 		voltage = data->get_int_volt(index);
 		regulator_set_voltage(data->vdd_int, voltage,
 				voltage + 25000);
-		/*if (data->busfreq_prepare)
-			data->busfreq_prepare(index);*/
+		if (data->busfreq_prepare)
+			data->busfreq_prepare(index);
 	}
 	if (data->set_qos)
 		data->set_qos(index);
@@ -145,8 +145,8 @@ static unsigned int _target(struct busfreq_data *data, struct opp *new)
 	data->target(index);
 
 	if (newfreq < currfreq) {
-		/*if (data->busfreq_post)
-			data->busfreq_post(index);*/
+		if (data->busfreq_post)
+			data->busfreq_post(index);
 		regulator_set_voltage(data->vdd_mif, voltage,
 				voltage + 25000);
 		voltage = data->get_int_volt(index);
@@ -484,173 +484,173 @@ static ssize_t store_load_history_size(struct device *device,
 }
 
 static ssize_t show_sampling_rate(struct device *device,
-		struct device_attribute *attr, char *buf)
+                struct device_attribute *attr, char *buf)
 {
-	struct platform_device *pdev = to_platform_device(bus_ctrl.dev);
-	struct busfreq_data *data = (struct busfreq_data *)platform_get_drvdata(pdev);
-	int len = 0;
+        struct platform_device *pdev = to_platform_device(bus_ctrl.dev);
+        struct busfreq_data *data = (struct busfreq_data *)platform_get_drvdata(pdev);
+        int len = 0;
 
-	len = sprintf(buf, "%d\n", jiffies_to_usecs(data->sampling_rate));
+        len = sprintf(buf, "%d\n", jiffies_to_usecs(data->sampling_rate));
 
-	return len;
+        return len;
 }
 static ssize_t store_sampling_rate(struct device *device,
-		struct device_attribute *attr,
-		const char *buf, size_t count)
+                struct device_attribute *attr,
+                const char *buf, size_t count)
 {
-	struct platform_device *pdev = to_platform_device(bus_ctrl.dev);
-	struct busfreq_data *data = (struct busfreq_data *)platform_get_drvdata(pdev);
-	int ret, tmp;
+        struct platform_device *pdev = to_platform_device(bus_ctrl.dev);
+        struct busfreq_data *data = (struct busfreq_data *)platform_get_drvdata(pdev);
+        int ret, tmp;
 
-	ret = sscanf(buf, "%d", &tmp);
-	if (tmp < 10000)
-		tmp = 10000;
-	if (tmp > 200000)
-		tmp = 200000;
+        ret = sscanf(buf, "%d", &tmp);
+        if (tmp < 10000)
+                tmp = 10000;
+        if (tmp > 200000)
+                tmp = 200000;
 
-	data->sampling_rate = usecs_to_jiffies(tmp);
+        data->sampling_rate = usecs_to_jiffies(tmp);
 
-	return count;
+        return count;
 }
 
 static ssize_t show_LP_mif_volt_table(struct device *device,
-		struct device_attribute *attr, char *buf)
-{	
-	struct device_opp *dev_opp = ERR_PTR(-ENODEV);
-	struct opp *temp_opp;
-	int len = 0;
+                struct device_attribute *attr, char *buf)
+{        
+        struct device_opp *dev_opp = ERR_PTR(-ENODEV);
+        struct opp *temp_opp;
+        int len = 0;
 
-	dev_opp = find_device_opp(bus_ctrl.dev);
+        dev_opp = find_device_opp(bus_ctrl.dev);
 
-	list_for_each_entry_rcu(temp_opp, &dev_opp->opp_list, node) {
-		if (temp_opp->available)
-			len += sprintf(buf + len, "%lu %lu\n",
-					opp_get_freq(temp_opp),
-					opp_get_voltage(temp_opp));
-	}
+        list_for_each_entry_rcu(temp_opp, &dev_opp->opp_list, node) {
+                if (temp_opp->available)
+                        len += sprintf(buf + len, "%lu %lu\n",
+                                        opp_get_freq(temp_opp),
+                                        opp_get_voltage(temp_opp));
+        }
 
-	return len;
+        return len;
 }
 
-#define BUSVOLT_SYSFS_FUNC_DECL()	\
-	struct platform_device *pdev = to_platform_device(bus_ctrl.dev);		\
-	struct busfreq_data *data = (struct busfreq_data *)platform_get_drvdata(pdev);	\
-	struct device_opp *dev_opp = find_device_opp(bus_ctrl.dev);			\
-	struct opp *temp_opp;								
+#define BUSVOLT_SYSFS_FUNC_DECL()        \
+        struct platform_device *pdev = to_platform_device(bus_ctrl.dev);                \
+        struct busfreq_data *data = (struct busfreq_data *)platform_get_drvdata(pdev);        \
+        struct device_opp *dev_opp = find_device_opp(bus_ctrl.dev);                        \
+        struct opp *temp_opp;                                                                
 
 static ssize_t store_LP_mif_volt_table(struct device *device,
-		struct device_attribute *attr,
-		const char *buf, size_t count)
+                struct device_attribute *attr,
+                const char *buf, size_t count)
 {
-	BUSVOLT_SYSFS_FUNC_DECL()
-	int u[data->table_size];
-	int t, i = 0;
+        BUSVOLT_SYSFS_FUNC_DECL()
+        int u[data->table_size];
+        int t, i = 0;
 
-	if((t = read_into((int*)&u, data->table_size, buf, count)) < 0)
-		return -EINVAL;
+        if((t = read_into((int*)&u, data->table_size, buf, count)) < 0)
+                return -EINVAL;
 
-	if(t == 2 && data->table_size != 2) {
-		temp_opp = opp_find_freq_exact(bus_ctrl.dev, u[0], true);
-		if(IS_ERR(temp_opp))
-			return -EINVAL;
+        if(t == 2 && data->table_size != 2) {
+                temp_opp = opp_find_freq_exact(bus_ctrl.dev, u[0], true);
+                if(IS_ERR(temp_opp))
+                        return -EINVAL;
 
-		if(u[i] % 50000)
-			u[i] += u[i] % 50000;
-		if(u[i] < 750000)
-			u[i] = 750000;
-		if(u[i] > 1200000)
-			u[i] = 1200000;
+                if(u[i] % 50000)
+                        u[i] += u[i] % 50000;
+                if(u[i] < 750000)
+                        u[i] = 750000;
+                if(u[i] > 1200000)
+                        u[i] = 1200000;
 
-		temp_opp->u_volt = u[1];
-	} else {
-		list_for_each_entry_rcu(temp_opp, &dev_opp->opp_list, node) {
-			if (temp_opp->available) {
-				/* Regulator constraint sanitation 
-				 * Buck1 on MAX77686
-				 */
+                temp_opp->u_volt = u[1];
+        } else {
+                list_for_each_entry_rcu(temp_opp, &dev_opp->opp_list, node) {
+                        if (temp_opp->available) {
+                                /* Regulator constraint sanitation 
+                                 * Buck1 on MAX77686
+                                 */
 
-				if(u[i] % 50000)
-					u[i] += u[i] % 50000;
-				if(u[i] < 750000)
-					u[i] = 750000;
-				if(u[i] > 1200000)
-					u[i] = 1200000;
+                                if(u[i] % 50000)
+                                        u[i] += u[i] % 50000;
+                                if(u[i] < 750000)
+                                        u[i] = 750000;
+                                if(u[i] > 1200000)
+                                        u[i] = 1200000;
 
-				temp_opp->u_volt = u[i++];
-			}
-		}
-	}
+                                temp_opp->u_volt = u[i++];
+                        }
+                }
+        }
 
-	return count;
+        return count;
 }
 
 static ssize_t show_LP_int_volt_table(struct device *device,
-		struct device_attribute *attr, char *buf)
+                struct device_attribute *attr, char *buf)
 {
-	BUSVOLT_SYSFS_FUNC_DECL()
-	int index, len = 0;
+        BUSVOLT_SYSFS_FUNC_DECL()
+        int index, len = 0;
 
-	list_for_each_entry_rcu(temp_opp, &dev_opp->opp_list, node) {
-		if (temp_opp->available) {
-			index = data->get_table_index(temp_opp);
-			len += sprintf(buf + len, "%lu %u\n",
-					opp_get_freq(temp_opp),
-					data->get_int_volt(index));
-		}
-	}
+        list_for_each_entry_rcu(temp_opp, &dev_opp->opp_list, node) {
+                if (temp_opp->available) {
+                        index = data->get_table_index(temp_opp);
+                        len += sprintf(buf + len, "%lu %u\n",
+                                        opp_get_freq(temp_opp),
+                                        data->get_int_volt(index));
+                }
+        }
 
-	return len;
+        return len;
 }
 
 static ssize_t store_LP_int_volt_table(struct device *device,
-		struct device_attribute *attr,
-		const char *buf, size_t count)
+                struct device_attribute *attr,
+                const char *buf, size_t count)
 {
-	BUSVOLT_SYSFS_FUNC_DECL()
-	int u[data->table_size];
-	int t, i = 0;
-	int index = 0;
+        BUSVOLT_SYSFS_FUNC_DECL()
+        int u[data->table_size];
+        int t, i = 0;
+        int index = 0;
 
-	if((t = read_into((int*)&u, data->table_size, buf, count)) < 0)
-		return -EINVAL;
+        if((t = read_into((int*)&u, data->table_size, buf, count)) < 0)
+                return -EINVAL;
 
-	if(t == 2 && data->table_size != 2) {
-		temp_opp = opp_find_freq_exact(bus_ctrl.dev, u[0], true);
-		if(IS_ERR(temp_opp))
-			return -EINVAL;
+        if(t == 2 && data->table_size != 2) {
+                temp_opp = opp_find_freq_exact(bus_ctrl.dev, u[0], true);
+                if(IS_ERR(temp_opp))
+                        return -EINVAL;
 
-		index = data->get_table_index(temp_opp);
+                index = data->get_table_index(temp_opp);
 
-		if(u[i] % 12500)
-			u[i] += u[i] % 12500;
-		if(u[i] < 600000)
-			u[i] = 600000;
-		if(u[i] > 1300000)
-			u[i] = 1300000;
+                if(u[i] % 12500)
+                        u[i] += u[i] % 12500;
+                if(u[i] < 600000)
+                        u[i] = 600000;
+                if(u[i] > 1300000)
+                        u[i] = 1300000;
 
-		data->int_table[index] = u[1];
-	} else {
-		list_for_each_entry_rcu(temp_opp, &dev_opp->opp_list, node) {
-			if (temp_opp->available) {
-				index = data->get_table_index(temp_opp);
+                data->int_table[index] = u[1];
+        } else {
+                list_for_each_entry_rcu(temp_opp, &dev_opp->opp_list, node) {
+                        if (temp_opp->available) {
+                                index = data->get_table_index(temp_opp);
 
-				/* Regulator constraint sanitation 
-				 * Buck3 on MAX77686
-				 */
+                                /* Regulator constraint sanitation 
+                                 * Buck3 on MAX77686
+                                 */
 
-				if(u[i] % 12500)
-					u[i] += u[i] % 12500;
-				if(u[i] < 600000)
-					u[i] = 600000;
-				if(u[i] > 1300000)
-					u[i] = 1300000;
+                                if(u[i] % 12500)
+                                        u[i] += u[i] % 12500;
+                                if(u[i] < 600000)
+                                        u[i] = 600000;
+                                if(u[i] > 1300000)
+                                        u[i] = 1300000;
 
-				data->int_table[index] = u[i++];
-			}
-		}
-	}
+                                data->int_table[index] = u[i++];
+                        }
+                }
+        }
 
-	return count;
+        return count;
 }
 
 static DEVICE_ATTR(min_freq, S_IRUGO | S_IWUGO, show_min_freq, store_min_freq);

@@ -543,10 +543,10 @@ static int touchkey_led_power_on(bool on)
 		else
 			gpio_direction_output(GPIO_3_TOUCH_EN_R1, 0);
 	} else {
-	if (on)
-		gpio_direction_output(GPIO_3_TOUCH_EN, 1);
-	else
-		gpio_direction_output(GPIO_3_TOUCH_EN, 0);
+		if (on)
+			gpio_direction_output(GPIO_3_TOUCH_EN, 1);
+		else
+			gpio_direction_output(GPIO_3_TOUCH_EN, 0);
 	}
 #else
 	if (on)
