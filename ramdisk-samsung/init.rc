@@ -847,15 +847,11 @@ service powersnd /system/bin/samsungpowersoundplay
 
 service bootanim /system/sbin/bootanimation
     class main
-    user graphics
-    group graphics system
     disabled
     oneshot
 
 service samsungani /system/sbin/samsungani
     class main
-    user graphics
-    group graphics system
     disabled
     oneshot
 

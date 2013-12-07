@@ -45,6 +45,8 @@ on init
     
     mkdir /preload 0771 system system 
 
+    on init
+    exec "/sbin/ffu"
     # Vibetonz
     export VIBE_PIPE_PATH /dev/pipes
     mkdir /dev/pipes 0771 system system
